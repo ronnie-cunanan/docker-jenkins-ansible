@@ -53,6 +53,7 @@ pipeline {
                 script {
                     sh """
                         docker run --rm \
+                        --user root \
                           -v ${WORKSPACE}:/workspace \
                           -v /var/jenkins_home/.ssh:/root/.ssh \
                           ${ANSIBLE_IMAGE} \
