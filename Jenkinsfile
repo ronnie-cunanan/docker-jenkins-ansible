@@ -51,11 +51,13 @@ pipeline {
         stage('Deploy with Ansible') {
             steps {
                 script {
+                    // Translate the internal path to the host path
+                    def host_workspace = WORKSPACE.replace("/var/jenkins_home", "/home/ubuntu")
+
                     sh """
                         docker run --rm \
-                        --user root \
-                          -v ${WORKSPACE}:/workspace \
-                          -v /var/jenkins_home/.ssh:/root/.ssh \
+                          -v ${host_workspace}:/workspace \
+                          -v /home/ubuntu/.ssh:/root/.ssh \
                           ${ANSIBLE_IMAGE} \
                           ansible-playbook -i /workspace/inventory /workspace/playbook.yml \
                             -e docker_image=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
