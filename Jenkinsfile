@@ -37,11 +37,16 @@ pipeline {
         stage('Deploy with Ansible') {
             steps {
                 script {
-                    sh '''
-                        ansible-playbook -i -i inventory playbook.yml \
+                    sh """
+                        docker run --rm \
+                          -v ${WORKSPACE}:/workspace \
+                          -v /var/jenkins_home/.ssh:/root/.ssh \
+                          cytopia/ansible:latest \
+                          ansible-playbook -i /workspace/inventory /workspace/playbook.yml \
                             -e docker_image=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
                             -e region=${AWS_REGION} \
-                    '''
+                            --ssh-extra-args='-o StrictHostKeyChecking=no'
+                    """
                 }
             }
         }
