@@ -68,7 +68,7 @@ pipeline {
 
     post {
         success {
-            echo echo "Deployment successful: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+            echo "Deployment successful: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
         }
         failure {
             echo "Build or deployment failed. Check stage logs."
