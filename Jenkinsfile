@@ -51,15 +51,14 @@ pipeline {
         stage('Deploy with Ansible') {
             steps {
                 script {
-                    // Translate the internal path to the host path
-                    def host_workspace = WORKSPACE.replace("/var/jenkins_home", "/home/ubuntu")
-
-                    sh """
+                     sh """
                         docker run --rm \
-                          -v ${host_workspace}:/workspace \
+                          -v /home/ubuntu:/var/jenkins_home \
                           -v /home/ubuntu/.ssh:/root/.ssh \
                           ${ANSIBLE_IMAGE} \
-                          ansible-playbook -i /workspace/inventory /workspace/playbook.yml \
+                          ansible-playbook \
+                            -i /var/jenkins_home/workspace/${JOB_NAME}/inventory \
+                            /var/jenkins_home/workspace/${JOB_NAME}/playbook.yml \
                             -e docker_image=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
                             -e region=${AWS_REGION} \
                             --ssh-extra-args='-o StrictHostKeyChecking=no'
