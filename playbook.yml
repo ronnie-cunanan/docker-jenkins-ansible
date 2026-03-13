@@ -1,0 +1,41 @@
+---
+- name: Deploy Docker Image from ECR to EC2
+  hosts: web
+  become: true
+  vars:
+    # These match the variables passed from your Jenkins pipeline
+    image_name: "{{ docker_image }}"
+    region: "{{ region }}"
+    
+  tasks:
+    - name: Ensure Docker is installed and running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Log into AWS ECR
+      shell: |
+        aws ecr get-login-password --region {{ region }} | \
+        docker login --username AWS --password-stdin {{ image_name.split('/')[0] }}
+      changed_when: false
+
+    - name: Pull the latest image from ECR
+      docker_image:
+        name: "{{ image_name }}"
+        source: pull
+        force_source: yes
+
+    - name: Stop and remove existing container
+      docker_container:
+        name: my-app-container
+        state: absent
+
+    - name: Run the new container
+      docker_container:
+        name: my-app-container
+        image: "{{ image_name }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8081:5001" # Adjust to your app's ports
