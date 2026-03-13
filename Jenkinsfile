@@ -1,16 +1,29 @@
 pipeline {
     agent any
 
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
     environment {
         AWS_REGION = 'ap-southeast-2'
         ECR_REGISTRY = credentials('ecr-registry-url')
         ECR_REPOSITORY = 'my-docker-repo'
         IMAGE_TAG = "${BUILD_NUMBER}"
+        ANSIBLE_IMAGE   = 'cytopia/ansible:latest'
         // EC2_HOST = credentials('ec2-host-dev')
         // ANSIBLE_INVENTORY = '/etc/ansible/hosts'
     }
 
     stages {
+        stage ('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], 
+                userRemoteConfigs: [[url: 'https://github.com/ronnie-cunanan/docker-jenkins-ansible.git']])
+            }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -41,7 +54,7 @@ pipeline {
                         docker run --rm \
                           -v ${WORKSPACE}:/workspace \
                           -v /var/jenkins_home/.ssh:/root/.ssh \
-                          cytopia/ansible:latest \
+                          ${ANSIBLE_IMAGE} \
                           ansible-playbook -i /workspace/inventory /workspace/playbook.yml \
                             -e docker_image=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
                             -e region=${AWS_REGION} \
@@ -53,8 +66,11 @@ pipeline {
     }
 
     post {
-        always {
-            cleanWs()
+        success {
+            echo echo "Deployment successful: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+        }
+        failure {
+            echo "Build or deployment failed. Check stage logs."
         }
     }
 }
