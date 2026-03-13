@@ -23,6 +23,7 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], 
                 userRemoteConfigs: [[url: 'https://github.com/ronnie-cunanan/docker-jenkins-ansible.git']])
             }
+        }
 
         stage('Build Docker Image') {
             steps {
