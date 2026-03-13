@@ -12,7 +12,7 @@ pipeline {
         ECR_REGISTRY = credentials('ecr-registry-url')
         ECR_REPOSITORY = 'my-docker-repo'
         IMAGE_TAG = "${BUILD_NUMBER}"
-        ANSIBLE_IMAGE   = 'cytopia/ansible:latest'
+        ANSIBLE_IMAGE = "willhallonline/ansible:latest"
         // EC2_HOST = credentials('ec2-host-dev')
         // ANSIBLE_INVENTORY = '/etc/ansible/hosts'
     }
