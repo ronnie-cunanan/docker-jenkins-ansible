@@ -53,7 +53,7 @@ pipeline {
                 script {
                      sh """
                         docker run --rm \
-                          -v /home/ubuntu:/var/jenkins_home \
+                          -v jenkins:/var/jenkins_home \
                           -v /home/ubuntu/.ssh:/root/.ssh \
                           ${ANSIBLE_IMAGE} \
                           ansible-playbook \
