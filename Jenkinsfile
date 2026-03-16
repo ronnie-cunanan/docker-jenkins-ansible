@@ -68,7 +68,7 @@ pipeline {
                         -u ubuntu \
                         -e docker_image=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
                         -e region=${AWS_REGION} \
-                        --ssh-extra-args='-o StrictHostKeyChecking=no'
+                        --ssh-extra-args='-o StrictHostKeyChecking=no'"
                     """
                 }   
               }
