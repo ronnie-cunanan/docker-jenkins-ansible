@@ -50,6 +50,26 @@ pipeline {
 
         stage('Deploy with Ansible') {
             steps {
+              // Wrap the execution in the sshagent block using your Credential ID
+              sshagent(['ec2-ssh-key']) {
+                script {
+                    // Create inventory file for Ansible
+                    sh """
+                    docker run --rm \
+                      -v /var/lib/docker/volumes/jenkins_home/_data:/var/jenkins_home \
+                      -v ${env.SSH_AUTH_SOCK}:/ssh-agent \
+                      -e SSH_AUTH_SOCK=/ssh-agent \
+                      ${ANSIBLE_IMAGE} \
+                      ansible-playbook \
+                        -i /var/jenkins_home/workspace/${JOB_NAME}/inventory \
+                        /var/jenkins_home/workspace/${JOB_NAME}/playbook.yml \
+                        -e docker_image=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} \
+                        -e region=${AWS_REGION} \
+                        --ssh-extra-args='-o StrictHostKeyChecking=no'
+                    """
+                }   
+              }
+                /*
                 script {
                      sh """
                         docker run --rm \
@@ -64,6 +84,7 @@ pipeline {
                             --ssh-extra-args='-o StrictHostKeyChecking=no'
                     """
                 }
+                */
             }
         }
     }
