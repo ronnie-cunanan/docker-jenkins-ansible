@@ -59,6 +59,8 @@ pipeline {
                       -v /var/lib/docker/volumes/jenkins_home/_data:/var/jenkins_home \
                       -v ${SSH_KEY}:/tmp/ansible_id_rsa \
                       ${ANSIBLE_IMAGE} \
+                      /bin/sh -c "cp /tmp/ansible_id_rsa /tmp/id_rsa_locked && \
+                      chmod 600 /tmp/id_rsa_locked && \
                       ansible-playbook \
                         -i /var/jenkins_home/workspace/${JOB_NAME}/inventory \
                         /var/jenkins_home/workspace/${JOB_NAME}/playbook.yml \
